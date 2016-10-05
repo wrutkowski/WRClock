@@ -1,9 +1,9 @@
 //
 //  ViewController.swift
-//  WRClockExample
+//  WRClock
 //
-//  Created by Wojciech Rutkowski on 04/10/2016.
-//  Copyright © 2016 Wojciech Rutkowski. All rights reserved.
+//  Created by Wojciech Rutkowski on 10/05/2016.
+//  Copyright (c) 2016 Wojciech Rutkowski. All rights reserved.
 //
 
 import UIKit
@@ -19,7 +19,6 @@ class ViewController: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
 
 }
 

@@ -1,0 +1,11 @@
+use_frameworks!
+
+target 'WRClock_Example' do
+  pod 'WRClock', :path => '../'
+
+  target 'WRClock_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
