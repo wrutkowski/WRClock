@@ -47,7 +47,7 @@ open class WRClock: UIView {
         let rect = CGRect(x: outerCircleWidth / 2, y: outerCircleWidth / 2, width: clockSize - outerCircleWidth, height: clockSize - outerCircleWidth)
         
         UIGraphicsBeginImageContext(CGSize(width: clockSize, height: clockSize))
-        var context = UIGraphicsGetCurrentContext()!
+        let context = UIGraphicsGetCurrentContext()!
         context.setStrokeColor(color.cgColor)
         context.setLineWidth(outerCircleWidth)
         context.addEllipse(in: rect)
