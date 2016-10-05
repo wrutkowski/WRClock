@@ -18,7 +18,7 @@ extension FloatingPoint {
     var radiansToDegrees: Self { return self * 180 / .pi }
 }
 
-public class WRClockImage {
+public class WRClock: UIView {
     var clockSize: CGFloat = 400
     var outerCircleWidth: CGFloat = 4
     var innerMarksMargin: CGFloat = 4
@@ -34,10 +34,8 @@ public class WRClockImage {
     var minuteHandWidth: CGFloat = 2
     var secondHandLengthRatio: CGFloat = 0.42
     var secondHandWidth: CGFloat = 1
-
-    var color: CGColor = UIColor.white.cgColor
-    var clockFace: CGImage?
-
+    var color: UIColor = UIColor.white
+    
     var quadrantMarkLength: CGFloat { return clockSize * quadrantMarkLengthRatio }
     var fiveMinutesMarkLength: CGFloat { return clockSize * fiveMinutesMarkLengthRatio }
     var minuteMarkLength: CGFloat { return clockSize * minuteMarkLengthRatio }
@@ -50,7 +48,7 @@ public class WRClockImage {
         let rect = CGRect(x: outerCircleWidth / 2, y: outerCircleWidth / 2, width: clockSize - outerCircleWidth, height: clockSize - outerCircleWidth)
         
         return renderer.image { context in
-            context.cgContext.setStrokeColor(color)
+            context.cgContext.setStrokeColor(color.cgColor)
             context.cgContext.setLineWidth(outerCircleWidth)
             context.cgContext.addEllipse(in: rect)
             context.cgContext.drawPath(using: .stroke)
@@ -82,114 +80,12 @@ public class WRClockImage {
         
     }
     
-    func drawClock() -> UIImage {
-        
-        
-        let date = Date()
-        
-        let components = Calendar.current.dateComponents([.hour, .minute, .second], from: date)
-        let hour = components.hour!
-        let minute = components.minute!
-        let second = components.second!
-        
-        let renderer = UIGraphicsImageRenderer(size: CGSize(width: clockSize, height: clockSize))
-        let rect = CGRect(x: outerCircleWidth / 2, y: outerCircleWidth / 2, width: clockSize - outerCircleWidth, height: clockSize - outerCircleWidth)
-        
-        if clockFace == nil {
-            let clockFaceImage = renderer.image { context in
-                context.cgContext.setStrokeColor(color)
-                context.cgContext.setLineWidth(outerCircleWidth)
-                context.cgContext.addEllipse(in: rect)
-                context.cgContext.drawPath(using: .stroke)
-                
-                context.cgContext.translateBy(x: clockSize / 2, y: clockSize / 2)
-                for x in 0..<60 {
-                    let startPoint = CGPoint(x: 0, y: clockSize / 2 - outerCircleWidth - innerMarksMargin)
-                    var endPoint = startPoint
-                    let width: CGFloat
-                    
-                    switch x {
-                    case _ where x % 15 == 0:
-                        endPoint.y -= quadrantMarkLength
-                        width = quadrantMarkWidth
-                    case _ where x % 5 == 0:
-                        endPoint.y -= fiveMinutesMarkLength
-                        width = fiveMinutesMarkWidth
-                    default:
-                        endPoint.y -= minuteMarkLength
-                        width = minuteMarkWidth
-                    }
-                    context.cgContext.move(to: startPoint)
-                    context.cgContext.addLine(to: endPoint)
-                    context.cgContext.setLineWidth(width)
-                    context.cgContext.drawPath(using: .stroke)
-                    context.cgContext.rotate(by: CGFloat(6).degreesToRadians)
-                }
-            }
-            clockFace = clockFaceImage.cgImage!
-        }
-        
-        let clock = renderer.image { context in
-            context.cgContext.setStrokeColor(color)
-            context.cgContext.setLineWidth(outerCircleWidth)
-            
-            context.cgContext.draw(clockFace!, in: rect)
-            
-            context.cgContext.translateBy(x: clockSize / 2, y: clockSize / 2)
-            
-            // hour
-            let h: Float = Float(hour % 12) + Float(minute) / 60 + Float(second) / 3600
-            context.cgContext.rotate(by: CGFloat(h * 30).degreesToRadians)
-            context.cgContext.move(to: CGPoint.zero)
-            context.cgContext.addLine(to: CGPoint(x: 0, y: -hourHandLength))
-            context.cgContext.setLineWidth(hourHandWidth)
-            context.cgContext.drawPath(using: .stroke)
-            context.cgContext.rotate(by: CGFloat(-h * 30).degreesToRadians)
-            
-            // minute
-            let m: Float = Float(minute) + Float(second) / 60
-            context.cgContext.rotate(by: CGFloat(m * 6).degreesToRadians)
-            context.cgContext.move(to: CGPoint.zero)
-            context.cgContext.addLine(to: CGPoint(x: 0, y: -minuteHandLength))
-            context.cgContext.setLineWidth(minuteHandWidth)
-            context.cgContext.drawPath(using: .stroke)
-            context.cgContext.rotate(by: CGFloat(-m * 6).degreesToRadians)
-            
-            // second
-            context.cgContext.rotate(by: CGFloat(second * 6).degreesToRadians)
-            context.cgContext.move(to: CGPoint.zero)
-            context.cgContext.addLine(to: CGPoint(x: 0, y: -secondHandLength))
-            context.cgContext.setLineWidth(secondHandWidth)
-            context.cgContext.drawPath(using: .stroke)
-        }
-        return clock
-    }
-}
-
-public class WRClockHand: UIView {
-    required public init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    init(length: CGFloat, width: CGFloat) {
-        super.init(frame: CGRect(x: 0, y: 0, width: width, height: length))
-        backgroundColor = UIColor.white
-    }
-    
-    public func update(to angle: CGFloat) {
-        let transformTranslate = CGAffineTransform(translationX: frame.size.width / 2, y: frame.size.height / 2)
-        transform = transformTranslate.rotated(by: (angle - 180).degreesToRadians)
-    }
-}
-
-public class WRClock: UIView {
-    private let wrClockImage = WRClockImage()
     private var timer: Timer?
     
     private var clockFace = UIImageView()
-    private var hourHand: WRClockHand!
-    private var minuteHand: WRClockHand!
-    private var secondHand: WRClockHand!
+    private var hourHand = WRClockHand()
+    private var minuteHand = WRClockHand()
+    private var secondHand = WRClockHand()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -204,10 +100,7 @@ public class WRClock: UIView {
     }
     
     func commonInit() {
-        wrClockImage.clockSize = min(frame.size.width, frame.size.height)
-        hourHand = WRClockHand(length: wrClockImage.hourHandLength, width: wrClockImage.hourHandWidth)
-        minuteHand = WRClockHand(length: wrClockImage.minuteHandLength, width: wrClockImage.minuteHandWidth)
-        secondHand = WRClockHand(length: wrClockImage.secondHandLength, width: wrClockImage.secondHandWidth)
+        clockSize = min(frame.size.width, frame.size.height)
         addSubview(clockFace)
         addSubview(hourHand)
         addSubview(minuteHand)
@@ -215,14 +108,18 @@ public class WRClock: UIView {
     }
     
     public override func draw(_ rect: CGRect) {
-        wrClockImage.clockSize = min(rect.width, rect.height)
+        clockSize = min(rect.width, rect.height)
         clockFace.frame = rect
-        clockFace.image = wrClockImage.clockFaceImage
-        hourHand.frame = CGRect(x: wrClockImage.clockSize / 2, y: wrClockImage.clockSize / 2, width: wrClockImage.hourHandWidth, height: wrClockImage.hourHandLength)
-        minuteHand.frame = CGRect(x: wrClockImage.clockSize / 2, y: wrClockImage.clockSize / 2, width: wrClockImage.minuteHandWidth, height: wrClockImage.minuteHandLength)
-        secondHand.frame = CGRect(x: wrClockImage.clockSize / 2, y: wrClockImage.clockSize / 2, width: wrClockImage.secondHandWidth, height: wrClockImage.secondHandLength)
+        clockFace.image = clockFaceImage
+        hourHand.frame = CGRect(x: (clockSize - hourHandWidth) / 2, y: clockSize / 2, width: hourHandWidth, height: hourHandLength)
+        hourHand.backgroundColor = color
+        minuteHand.frame = CGRect(x: (clockSize - minuteHandWidth) / 2, y: clockSize / 2, width: minuteHandWidth, height: minuteHandLength)
+        minuteHand.backgroundColor = color
+        secondHand.frame = CGRect(x: (clockSize - secondHandWidth) / 2, y: clockSize / 2, width: secondHandWidth, height: secondHandLength)
+        secondHand.backgroundColor = color
         
         if timer == nil {
+            tick()
             timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { [weak self] (timer) in
                 self?.tick()
             })
@@ -241,5 +138,21 @@ public class WRClock: UIView {
         minuteHand.update(to: CGFloat(m * 6))
         secondHand.update(to: CGFloat(second * 6))
     }
+}
+
+public class WRClockHand: UIView {
+    required public init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
+    init() {
+        super.init(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
+        layer.anchorPoint = CGPoint(x: 0.5, y: 0)
+    }
+    
+    public func update(to angle: CGFloat) {
+        var transform = CATransform3DIdentity
+        transform = CATransform3DRotate(transform, (angle - 180).degreesToRadians, 0, 0, 1)
+        layer.transform = transform
+    }
 }
