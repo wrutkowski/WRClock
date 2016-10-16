@@ -19,22 +19,28 @@ extension FloatingPoint {
 }
 
 open class WRClock: UIView {
-    var clockSize: CGFloat = 400
-    var outerCircleWidth: CGFloat = 4
-    var innerMarksMargin: CGFloat = 4
-    var quadrantMarkLengthRatio: CGFloat = 0.05
-    var quadrantMarkWidth: CGFloat = 2
-    var fiveMinutesMarkLengthRatio: CGFloat = 0.03
-    var fiveMinutesMarkWidth: CGFloat = 2
-    var minuteMarkLengthRatio: CGFloat = 0.02
-    var minuteMarkWidth: CGFloat = 1
-    var hourHandLengthRatio: CGFloat = 0.2
-    var hourHandWidth: CGFloat = 4
-    var minuteHandLengthRatio: CGFloat = 0.35
-    var minuteHandWidth: CGFloat = 2
-    var secondHandLengthRatio: CGFloat = 0.42
-    var secondHandWidth: CGFloat = 1
-    var color: UIColor = UIColor.white
+    open var clockSize: CGFloat = 400
+    open var outerCircleWidth: CGFloat = 4
+    open var innerMarksMargin: CGFloat = 4
+    open var quadrantMarkLengthRatio: CGFloat = 0.05
+    open var quadrantMarkWidth: CGFloat = 2
+    open var fiveMinutesMarkLengthRatio: CGFloat = 0.03
+    open var fiveMinutesMarkWidth: CGFloat = 2
+    open var minuteMarkLengthRatio: CGFloat = 0.02
+    open var minuteMarkWidth: CGFloat = 1
+    open var hourHandLengthRatio: CGFloat = 0.2
+    open var hourHandWidth: CGFloat = 4
+    open var minuteHandLengthRatio: CGFloat = 0.35
+    open var minuteHandWidth: CGFloat = 2
+    open var secondHandLengthRatio: CGFloat = 0.42
+    open var secondHandWidth: CGFloat = 1
+    open var color: UIColor = UIColor.white
+    open var realTime: Bool = true
+    open var staticTime: Bool = false
+    open var startDate: Date?
+    open var clockRatio: Float = 1.0
+    open var refreshTimeInterval: TimeInterval = 1.0
+    private var startTickingDate: Date?
     
     var quadrantMarkLength: CGFloat { return clockSize * quadrantMarkLengthRatio }
     var fiveMinutesMarkLength: CGFloat { return clockSize * fiveMinutesMarkLengthRatio }
@@ -46,7 +52,7 @@ open class WRClock: UIView {
     var clockFaceImage: UIImage {
         let rect = CGRect(x: outerCircleWidth / 2, y: outerCircleWidth / 2, width: clockSize - outerCircleWidth, height: clockSize - outerCircleWidth)
         
-        UIGraphicsBeginImageContext(CGSize(width: clockSize, height: clockSize))
+        UIGraphicsBeginImageContextWithOptions(CGSize(width: clockSize, height: clockSize), false, 0.0)
         let context = UIGraphicsGetCurrentContext()!
         context.setStrokeColor(color.cgColor)
         context.setLineWidth(outerCircleWidth)
@@ -112,6 +118,14 @@ open class WRClock: UIView {
         clockSize = min(rect.width, rect.height)
         clockFace.frame = rect
         clockFace.image = clockFaceImage
+        
+        let hourAngle = hourHand.angle
+        let minuteAngle = minuteHand.angle
+        let secondAngle = secondHand.angle
+        hourHand.update(to: 0, animated: false)
+        minuteHand.update(to: 0, animated: false)
+        secondHand.update(to: 0, animated: false)
+        
         hourHand.frame = CGRect(x: (clockSize - hourHandWidth) / 2, y: clockSize / 2, width: hourHandWidth, height: hourHandLength)
         hourHand.backgroundColor = color
         minuteHand.frame = CGRect(x: (clockSize - minuteHandWidth) / 2, y: clockSize / 2, width: minuteHandWidth, height: minuteHandLength)
@@ -119,14 +133,36 @@ open class WRClock: UIView {
         secondHand.frame = CGRect(x: (clockSize - secondHandWidth) / 2, y: clockSize / 2, width: secondHandWidth, height: secondHandLength)
         secondHand.backgroundColor = color
         
-        if timer == nil {
-            tick()
-            timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(tick), userInfo: nil, repeats: true)
+        hourHand.update(to: hourAngle, animated: false)
+        minuteHand.update(to: minuteAngle, animated: false)
+        secondHand.update(to: secondAngle, animated: false)
+        
+        startTickingDate = Date()
+        tick()
+        if timer != nil {
+            timer?.invalidate()
+            timer = nil
+        }
+        if !staticTime {
+            timer = Timer.scheduledTimer(timeInterval: refreshTimeInterval, target: self, selector: #selector(tick), userInfo: nil, repeats: true)
         }
     }
     
+    open func update() {
+        setNeedsDisplay()
+    }
+    
     @objc fileprivate func tick() {
-        let date = Date()
+        let date: Date
+        if realTime {
+            date = Date()
+        } else {
+            guard let startDate = startDate else {
+                fatalError("startDate is not set while realTime is set to false")
+            }
+            let timeInterval = -startTickingDate!.timeIntervalSinceNow
+            date = startDate.addingTimeInterval(timeInterval * TimeInterval(clockRatio))
+        }
         let components = Calendar.current.dateComponents([.hour, .minute, .second], from: date)
         let hour = components.hour!
         let minute = components.minute!
@@ -140,18 +176,32 @@ open class WRClock: UIView {
 }
 
 open class WRClockHand: UIView {
+    private(set) var angle: CGFloat = 0.0
+    
     required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
     init() {
         super.init(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
+        clipsToBounds = false
         layer.anchorPoint = CGPoint(x: 0.5, y: 0)
+        layer.shadowColor = UIColor.black.cgColor
+        layer.shadowRadius = 1.0
+        layer.shadowOpacity = 0.5
+        layer.shadowOffset = CGSize(width: 0, height: 0.5)
     }
     
-    open func update(to angle: CGFloat) {
+    open func update(to angle: CGFloat, animated: Bool = true) {
+        self.angle = angle
         var transform = CATransform3DIdentity
         transform = CATransform3DRotate(transform, (angle - 180).degreesToRadians, 0, 0, 1)
-        layer.transform = transform
+        if animated {
+            UIView.animate(withDuration: 1.0) {
+                self.layer.transform = transform
+            }
+        } else {
+            self.layer.transform = transform
+        }
     }
 }

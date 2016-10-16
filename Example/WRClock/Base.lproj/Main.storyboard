@@ -4,6 +4,7 @@
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11161"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -25,14 +26,50 @@
                                     <constraint firstAttribute="width" secondItem="6Df-Pc-r1y" secondAttribute="height" multiplier="1:1" id="A7t-6T-ZuA"/>
                                 </constraints>
                             </view>
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Lxf-s2-Dbu">
+                                <frame key="frameInset" minX="16" minY="629" width="70" height="30"/>
+                                <state key="normal" title="Real Time">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="realTime:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Chp-6e-HZa"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="y17-01-NXR">
+                                <frame key="frameInset" minX="94" minY="629" width="126" height="30"/>
+                                <state key="normal" title="Fast Reverse Time">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="fastReverseTime:" destination="BYZ-38-t0r" eventType="touchUpInside" id="XTF-eW-DAf"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7Wc-YA-oV4">
+                                <frame key="frameInset" minX="228" minY="629" width="126" height="30"/>
+                                <state key="normal" title="Static 12 o'clock">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="static12OClock:" destination="BYZ-38-t0r" eventType="touchUpInside" id="JAO-M3-wko"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="0.95294117649999999" green="0.50588235290000005" blue="0.094117647060000004" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="6Df-Pc-r1y" secondAttribute="trailing" constant="16" id="7CW-h7-z0C"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="y17-01-NXR" secondAttribute="bottom" constant="8" id="FJa-CO-43X"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="Lxf-s2-Dbu" secondAttribute="bottom" constant="8" id="RO2-tj-B1O"/>
+                            <constraint firstItem="7Wc-YA-oV4" firstAttribute="leading" secondItem="y17-01-NXR" secondAttribute="trailing" constant="8" id="YxD-NA-L6e"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="7Wc-YA-oV4" secondAttribute="bottom" constant="8" id="YyE-bF-RKb"/>
                             <constraint firstItem="6Df-Pc-r1y" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="ZBE-qN-NLM"/>
+                            <constraint firstItem="Lxf-s2-Dbu" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="anL-Sd-Q1A"/>
                             <constraint firstItem="6Df-Pc-r1y" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="16" id="rI6-Ha-OQH"/>
+                            <constraint firstItem="y17-01-NXR" firstAttribute="leading" secondItem="Lxf-s2-Dbu" secondAttribute="trailing" constant="8" id="yjh-lj-wXw"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="clock" destination="6Df-Pc-r1y" id="1T2-fm-9ac"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
