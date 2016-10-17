@@ -18,29 +18,30 @@ extension FloatingPoint {
     var radiansToDegrees: Self { return self * 180 / .pi }
 }
 
+@IBDesignable
 open class WRClock: UIView {
-    open var clockSize: CGFloat = 400
-    open var outerCircleWidth: CGFloat = 4
-    open var innerMarksMargin: CGFloat = 4
-    open var quadrantMarkLengthRatio: CGFloat = 0.05
-    open var quadrantMarkWidth: CGFloat = 2
-    open var fiveMinutesMarkLengthRatio: CGFloat = 0.03
-    open var fiveMinutesMarkWidth: CGFloat = 2
-    open var minuteMarkLengthRatio: CGFloat = 0.02
-    open var minuteMarkWidth: CGFloat = 1
-    open var hourHandLengthRatio: CGFloat = 0.2
-    open var hourHandWidth: CGFloat = 4
-    open var minuteHandLengthRatio: CGFloat = 0.35
-    open var minuteHandWidth: CGFloat = 2
-    open var secondHandLengthRatio: CGFloat = 0.42
-    open var secondHandWidth: CGFloat = 1
-    open var color: UIColor = UIColor.white
-    open var realTime: Bool = true
-    open var staticTime: Bool = false
+    @IBInspectable open var outerCircleWidth: CGFloat = 4
+    @IBInspectable open var innerMarksMargin: CGFloat = 4
+    @IBInspectable open var quadrantMarkLengthRatio: CGFloat = 0.05
+    @IBInspectable open var quadrantMarkWidth: CGFloat = 2
+    @IBInspectable open var fiveMinutesMarkLengthRatio: CGFloat = 0.03
+    @IBInspectable open var fiveMinutesMarkWidth: CGFloat = 2
+    @IBInspectable open var minuteMarkLengthRatio: CGFloat = 0.02
+    @IBInspectable open var minuteMarkWidth: CGFloat = 1
+    @IBInspectable open var hourHandLengthRatio: CGFloat = 0.2
+    @IBInspectable open var hourHandWidth: CGFloat = 4
+    @IBInspectable open var minuteHandLengthRatio: CGFloat = 0.35
+    @IBInspectable open var minuteHandWidth: CGFloat = 2
+    @IBInspectable open var secondHandLengthRatio: CGFloat = 0.42
+    @IBInspectable open var secondHandWidth: CGFloat = 1
+    @IBInspectable open var color: UIColor = UIColor.white
+    @IBInspectable open var realTime: Bool = true
+    @IBInspectable open var staticTime: Bool = false
     open var startDate: Date?
-    open var clockRatio: Float = 1.0
-    open var refreshTimeInterval: TimeInterval = 1.0
+    @IBInspectable open var clockRatio: Float = 1.0
+    @IBInspectable open var refreshTimeInterval: TimeInterval = 1.0
     private var startTickingDate: Date?
+    private var clockSize: CGFloat = 400
     
     var quadrantMarkLength: CGFloat { return clockSize * quadrantMarkLengthRatio }
     var fiveMinutesMarkLength: CGFloat { return clockSize * fiveMinutesMarkLengthRatio }
@@ -132,6 +133,14 @@ open class WRClock: UIView {
         minuteHand.backgroundColor = color
         secondHand.frame = CGRect(x: (clockSize - secondHandWidth) / 2, y: clockSize / 2, width: secondHandWidth, height: secondHandLength)
         secondHand.backgroundColor = color
+        
+        #if TARGET_INTERFACE_BUILDER
+            hourHand.update(to: 305, animated: false)
+            minuteHand.update(to: 55, animated: false)
+            secondHand.update(to: 190, animated: false)
+            tick()
+            return
+        #endif
         
         hourHand.update(to: hourAngle, animated: false)
         minuteHand.update(to: minuteAngle, animated: false)
